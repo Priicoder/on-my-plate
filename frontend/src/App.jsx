@@ -22,21 +22,18 @@ export default function App() {
   const generate = async () => {
     setStep(3);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const res = await fetch(`${API_BASE}/api/plan`, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({
-          model:"claude-sonnet-4-6",
-          max_tokens:4000,
-          messages:[{ role:"user", content: buildPrompt(form) }],
-        }),
+        body: JSON.stringify({ prompt: buildPrompt(form) }),
       });
       if (!res.ok) {
         const errBody = await res.text().catch(()=>"");
         throw new Error(`API error ${res.status}${errBody? ": "+errBody.slice(0,120):""}`);
       }
       const data = await res.json();
-      const raw = data.content.map(b=>b.text||"").join("").trim();
+      const raw = (data.text || "").trim();
       const parsed = repairJSON(raw);
       // Ensure all 7 days exist with fallback
       const keys = Object.keys(parsed);
