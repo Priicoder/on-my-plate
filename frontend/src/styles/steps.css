@@ -1,0 +1,60 @@
+.option-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.option-grid--age { grid-template-columns: repeat(5, 1fr); }
+.option-grid--auto { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.option-grid--auto-sm { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+
+.option-grid--two {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.option-grid--three {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Multi-select goal cards (Step 2) */
+.goal {
+  padding: 13px 10px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  transition: all 0.15s;
+}
+
+.goal--active {
+  border: 2px solid var(--sage);
+  background: var(--sage-l);
+}
+
+.goal__emoji {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.goal__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.goal--active .goal__label { color: var(--sage); }
+
+.goal__desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}

@@ -1,10 +1,10 @@
-import { INK, MUTED } from "../../constants/theme";
+import "../../styles/SLabel.css";
 
 export default function SLabel({ children, note }) {
   return (
-    <div style={{ marginBottom:10 }}>
-      <div style={{ fontSize:15, fontWeight:500, color:INK, marginBottom:note?3:0 }}>{children}</div>
-      {note && <div style={{ fontSize:13, color:MUTED }}>{note}</div>}
+    <div className="s-label">
+      <div className={`s-label__text${note ? " s-label__text--with-note" : ""}`}>{children}</div>
+      {note && <div className="s-label__note">{note}</div>}
     </div>
   );
 }

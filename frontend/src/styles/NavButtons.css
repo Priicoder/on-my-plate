@@ -1,0 +1,40 @@
+.nav-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.nav-buttons--with-back {
+  grid-template-columns: 1fr 2fr;
+}
+
+.nav-back {
+  padding: 14px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.nav-next {
+  padding: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.15s;
+  box-shadow: 0 4px 14px rgba(74, 124, 89, 0.27);
+}
+
+.nav-next:disabled {
+  cursor: not-allowed;
+  background: var(--mist);
+  color: var(--muted);
+  box-shadow: none;
+}

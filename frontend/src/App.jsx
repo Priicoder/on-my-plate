@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { CREAM, SAGE, BORDER, MUTED } from "./constants/theme";
 import { DAYS } from "./constants/data";
 import { buildPrompt, repairJSON } from "./utils/mealPlan";
 import Progress from "./components/common/Progress";
@@ -54,23 +53,23 @@ export default function App() {
   };
 
   return (
-    <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+    <div className="app">
       {/* Top bar */}
-      <div style={{ borderBottom:`1px solid ${BORDER}`, background:"#fff", padding:"0 20px" }}>
-        <div style={{ maxWidth:680, margin:"0 auto", padding:"14px 0", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <span style={{ fontSize:22 }}>🌿</span>
+      <div className="topbar">
+        <div className="topbar__inner">
+          <div className="brand">
+            <span className="brand__logo">🌿</span>
             <div>
-              <div style={{ fontSize:16, fontWeight:600, color:SAGE, letterSpacing:"-0.3px" }}>On My Plate</div>
-              <div style={{ fontSize:11, color:MUTED, marginTop:-1 }}>personalised plant-based nutrition</div>
+              <div className="brand__name">On My Plate</div>
+              <div className="brand__tag">personalised plant-based nutrition</div>
             </div>
           </div>
-          {step < 3 && <span style={{ fontSize:12, color:MUTED }}>Free · No sign-up · Private</span>}
+          {step < 3 && <span className="topbar__note">Free · No sign-up · Private</span>}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"28px 20px 60px" }}>
+      <div className="container">
         {step < 3 && <Progress step={step} total={3} />}
 
         {step===0 && <Step1 data={form} set={set} onNext={()=>setStep(1)} />}

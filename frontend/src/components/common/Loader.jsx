@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { SAGE, MUTED } from "../../constants/theme";
+import "../../styles/Loader.css";
 
 export default function Loader() {
   const msgs = ["Consulting your nutritional needs…","Picking seasonal ingredients…","Building your 7-day plan…","Adding the finishing garnish…"];
   const [idx, setIdx] = useState(0);
   useState(()=>{ const t=setInterval(()=>setIdx(i=>(i+1)%msgs.length),1800); return()=>clearInterval(t); });
   return (
-    <div style={{ textAlign:"center", padding:"60px 20px" }}>
-      <div style={{ fontSize:40, marginBottom:20, animation:"spin 2s linear infinite" }}>🌿</div>
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
-      <p style={{ fontSize:16, color:SAGE, fontWeight:500 }}>{msgs[idx]}</p>
-      <p style={{ fontSize:13, color:MUTED, marginTop:8 }}>Crafting your personalised weekly plan…</p>
+    <div className="loader">
+      <div className="loader__icon">🌿</div>
+      <p className="loader__msg">{msgs[idx]}</p>
+      <p className="loader__sub">Crafting your personalised weekly plan…</p>
     </div>
   );
 }
