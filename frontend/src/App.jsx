@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DAYS } from "./constants/data";
 import { buildPrompt, repairJSON } from "./utils/mealPlan";
 import Progress from "./components/common/Progress";
@@ -8,7 +8,7 @@ import Step1 from "./components/steps/Step1";
 import Step2 from "./components/steps/Step2";
 import WeeklyPlan from "./components/plan/WeeklyPlan";
 
-const EMPTY_FORM = { ageGroup:"", gender:"", conditions:[], dietType:"", goals:[], cuisine:"", budget:"", allergies:[] };
+const EMPTY_FORM = { ageGroup:"", gender:"", conditions:[], healthConditions:[], dietType:"", eggPreference:"", goals:[], cuisine:"", budget:"", allergies:[], religiousPrefs:[], observance:"", fastingDays:[] };
 
 // ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
@@ -16,6 +16,9 @@ export default function App() {
   const [form, setForm]     = useState(EMPTY_FORM);
   const [plan, setPlan]     = useState(null);
   const [errMsg, setErrMsg] = useState("");
+
+  // Each step should open at the top so the user never lands mid-page
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "auto" }); }, [step]);
 
   const set = (key, val) => setForm(f=>({...f,[key]:val}));
 

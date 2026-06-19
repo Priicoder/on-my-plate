@@ -23,6 +23,13 @@
   gap: 8px;
 }
 
+/* Egg preference sub-options (shown when Vegetarian is selected) */
+.egg-pref {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
 /* Multi-select goal cards (Step 2) */
 .goal {
   padding: 13px 10px;
