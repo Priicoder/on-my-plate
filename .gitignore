@@ -2,9 +2,10 @@
 .env
 .env.*
 !.env.example
+dist
 
 # Dependencies
-node_modules/
+node_modules
 
 # Logs
 *.log
