@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { CUISINES, AGE_GROUPS, GOALS, BUDGETS, DAYS, SEASON_FRUITS } from "../../constants/data";
 import { getSeason } from "../../utils/season";
-import { generatePrintHTML, triggerPrint } from "../../utils/printPlan";
+import { generatePrintHTML, generateGroceryPrintHTML, triggerPrint } from "../../utils/printPlan";
+import { buildGroceryPrompt, repairJSON } from "../../utils/mealPlan";
 import "../../styles/WeeklyPlan.css";
 
 const MEALS = [
@@ -15,6 +16,12 @@ const MEALS = [
 export default function WeeklyPlan({ plan, data, onReset }) {
   const [activeDay, setActiveDay] = useState(0);
 
+  // Groceries: lazy-generated from the plan on demand, then cached
+  const [groceries, setGroceries] = useState(null);
+  const [gLoading, setGLoading] = useState(false);
+  const [gError, setGError] = useState(false);
+  const [gOpen, setGOpen] = useState(false);
+
   const season = getSeason();
   const fruits = SEASON_FRUITS[season];
 
@@ -24,6 +31,35 @@ export default function WeeklyPlan({ plan, data, onReset }) {
   const handlePrint = () => {
     const html = generatePrintHTML(plan, data, days);
     triggerPrint(html);
+  };
+
+  const handleGroceryPrint = () => {
+    if (groceries) triggerPrint(generateGroceryPrintHTML(groceries));
+  };
+
+  const loadGroceries = async () => {
+    setGLoading(true); setGError(false);
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const res = await fetch(`${API_BASE}/api/plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: buildGroceryPrompt(plan) }),
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const body = await res.json();
+      setGroceries(repairJSON((body.text || "").trim()));
+    } catch (e) {
+      setGError(true);
+    } finally {
+      setGLoading(false);
+    }
+  };
+
+  const toggleGroceries = () => {
+    if (groceries) { setGOpen(o => !o); return; }
+    setGOpen(true);
+    loadGroceries();
   };
 
   return (
@@ -45,7 +81,7 @@ export default function WeeklyPlan({ plan, data, onReset }) {
         </div>
         <div className="plan-actions">
           <button onClick={handlePrint} className="btn-print">
-            🖨️ Save / Print
+            🖨️ Save
           </button>
           <button onClick={onReset} className="btn-reset">
             Start over
@@ -95,17 +131,43 @@ export default function WeeklyPlan({ plan, data, onReset }) {
         <p className="season__note">Aim for 2–3 servings daily, between meals — not right before or after eating.</p>
       </div>
 
-      {/* Nav between days */}
-      <div className="day-nav">
-        <button onClick={()=>setActiveDay(d=>Math.max(0,d-1))} disabled={activeDay===0}
-          className="day-nav__btn day-nav__btn--prev">
-          ← {activeDay>0 ? DAYS[activeDay-1] : ""}
-        </button>
-        <button onClick={()=>setActiveDay(d=>Math.min(6,d+1))} disabled={activeDay===6}
-          className="day-nav__btn day-nav__btn--next">
-          {activeDay<6 ? DAYS[activeDay+1] : ""} →
+      {/* Required groceries */}
+      <div className="grocery-actions">
+        <button onClick={toggleGroceries} className="btn-print">
+          🛒 {gOpen && groceries ? "Hide groceries" : "Required groceries"}
         </button>
       </div>
+
+      {gOpen && (
+        <div className="card grocery">
+          <div className="grocery__head">
+            <div className="grocery__title">🛒 Weekly grocery list</div>
+            {groceries && !gLoading && (
+              <button onClick={handleGroceryPrint} className="btn-print">🖨️ Save</button>
+            )}
+          </div>
+          {gLoading && <p className="grocery__msg">Gathering your ingredients…</p>}
+          {gError && (
+            <p className="grocery__msg">
+              Couldn't generate the list. <button className="grocery__retry" onClick={loadGroceries}>Try again</button>
+            </p>
+          )}
+          {groceries && !gLoading && (
+            <div className="grocery__grid">
+              {Object.entries(groceries)
+                .filter(([, items]) => Array.isArray(items) && items.length > 0)
+                .map(([cat, items]) => (
+                  <div key={cat} className="grocery__cat">
+                    <div className="grocery__cat-title">{cat}</div>
+                    <ul className="grocery__list">
+                      {items.map((it, i) => <li key={i}>{it}</li>)}
+                    </ul>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

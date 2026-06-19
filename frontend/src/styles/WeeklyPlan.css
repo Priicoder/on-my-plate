@@ -57,6 +57,82 @@
   border: 1.5px solid var(--border);
   font-size: 13px;
   color: var(--muted);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-reset:hover {
+  border-color: #2F5238;
+  color: #2F5238;
+}
+
+/* Weekly grocery list */
+.grocery-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 16px;
+}
+
+.grocery { margin-top: 14px; }
+
+.grocery__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.grocery__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sage);
+}
+
+.grocery__msg { font-size: 14px; color: var(--muted); }
+
+.grocery__retry {
+  background: none;
+  border: none;
+  color: var(--sage);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.grocery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.grocery__cat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.grocery__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.grocery__list li {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 3px 0 3px 16px;
+  position: relative;
+}
+
+.grocery__list li::before {
+  content: "•";
+  color: var(--sage);
+  position: absolute;
+  left: 2px;
 }
 
 /* Day tabs */

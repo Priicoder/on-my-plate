@@ -72,6 +72,12 @@ export const EGG_PREFERENCES = [
   { id: "eggless",  label: "Eggless",  sub: "No eggs",      emoji: "🚫" },
 ];
 
+export const KITCHEN_SETUPS = [
+  { id: "full",    label: "Full kitchen", sub: "Stove / induction",        emoji: "🍳" },
+  { id: "minimal", label: "Minimal",      sub: "Kettle / microwave only",  emoji: "☕" },
+  { id: "nocook",  label: "No cooking",   sub: "PG / hostel — ready-to-eat", emoji: "🥗" },
+];
+
 export const BUDGETS = [
   { id: "low",    label: "Budget",    sub: "Under ₹200/day",  emoji: "🌱" },
   { id: "medium", label: "Moderate",  sub: "₹200–500/day",    emoji: "🥦" },
@@ -86,23 +92,17 @@ export const RELIGIOUS_PREFS = [
   { id: "sattvic", label: "Sattvic",         sub: "No onion & garlic",            emoji: "🕉️" },
 ];
 
-// Fasting / festival observance modes. "sattvic_days" & "vrat_days" use the
-// weekday picker below; "navratri" & "ramadan" apply to the whole plan.
-export const OBSERVANCES = [
-  { id: "none",        label: "None",            sub: "No fasting",            emoji: "✓",  needsDays: false },
-  { id: "sattvic_days",label: "Light / Sattvic", sub: "Simple food on picked days", emoji: "🥗", needsDays: true },
-  { id: "vrat_days",   label: "Full vrat",       sub: "Falahari food on picked days", emoji: "🙏", needsDays: true },
-  { id: "navratri",    label: "Navratri",        sub: "9-day vrat — whole plan", emoji: "🪔", needsDays: false },
-  { id: "ramadan",     label: "Ramadan (Roza)",  sub: "Sehri + Iftar meals",   emoji: "🌙", needsDays: false },
-];
-
-// Weekday picker for the day-based observances (Somwar vrat, etc.)
-export const FASTING_DAYS = [
-  { id: "Monday",   label: "Monday",   sub: "Somwar vrat" },
-  { id: "Tuesday",  label: "Tuesday",  sub: "Mangalwar vrat" },
-  { id: "Thursday", label: "Thursday", sub: "Guruwar vrat" },
-  { id: "Friday",   label: "Friday",   sub: "Shukravar vrat" },
-  { id: "Saturday", label: "Saturday", sub: "Shaniwar vrat" },
+// Upcoming fasting/festival observances are fetched live from GET /api/observances
+// (Hindu Panchang computed server-side + Ramadan via the Aladhan API). The user
+// picks a faith first; `types` decides which observances are shown.
+export const FAITHS = [
+  { id: "hindu",     label: "Hindu",     emoji: "🕉️", types: ["ekadashi", "pradosh", "sawan_somwar", "navratri"] },
+  { id: "muslim",    label: "Muslim",    emoji: "☪️", types: ["ramadan"] },
+  { id: "jain",      label: "Jain",      emoji: "🤲", types: ["jain_ashtami", "jain_chaudas"] },
+  { id: "christian", label: "Christian", emoji: "✝️", types: ["ash_wednesday", "lent_friday", "good_friday"] },
+  { id: "buddhist",  label: "Buddhist",  emoji: "☸️", types: ["uposatha", "buddha_purnima"] },
+  { id: "sikh",      label: "Sikh",      emoji: "🪯", types: ["baisakhi", "gurpurab"] },
+  { id: "all",       label: "Show all",  emoji: "🗓️", types: ["ekadashi", "pradosh", "sawan_somwar", "navratri", "ramadan", "jain_ashtami", "jain_chaudas", "ash_wednesday", "lent_friday", "good_friday", "uposatha", "buddha_purnima", "baisakhi", "gurpurab"] },
 ];
 
 export const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];

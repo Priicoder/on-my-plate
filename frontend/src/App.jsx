@@ -8,7 +8,7 @@ import Step1 from "./components/steps/Step1";
 import Step2 from "./components/steps/Step2";
 import WeeklyPlan from "./components/plan/WeeklyPlan";
 
-const EMPTY_FORM = { ageGroup:"", gender:"", conditions:[], healthConditions:[], dietType:"", eggPreference:"", goals:[], cuisine:"", budget:"", allergies:[], religiousPrefs:[], observance:"", fastingDays:[] };
+const EMPTY_FORM = { ageGroup:"", gender:"", conditions:[], healthConditions:[], dietType:"", eggPreference:"", goals:[], cuisine:"", budget:"", kitchen:"", allergies:[], religiousPrefs:[], faith:"", observanceEvents:[] };
 
 // ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {

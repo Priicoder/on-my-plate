@@ -30,6 +30,38 @@
   border-top: 1px dashed var(--border);
 }
 
+/* Fasting & observances calendar list */
+.obs-msg { font-size: 13px; color: var(--muted); margin: 4px 0; }
+
+.obs-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.obs-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.obs-item--active { border: 2px solid var(--sage); background: var(--sage-l); }
+.obs-item__emoji { font-size: 20px; }
+.obs-item__body { display: flex; flex-direction: column; flex: 1; }
+.obs-item__name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.obs-item--active .obs-item__name { color: var(--sage); }
+.obs-item__date { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.obs-item__check { color: var(--sage); font-weight: 700; }
+
+.obs-note { font-size: 11px; color: var(--muted); margin-top: 8px; font-style: italic; }
+
 /* Multi-select goal cards (Step 2) */
 .goal {
   padding: 13px 10px;
