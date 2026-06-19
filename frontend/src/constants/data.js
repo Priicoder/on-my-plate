@@ -67,6 +67,15 @@ export const DIET_TYPES = [
   { id: "vegan",      label: "Vegan",      sub: "100% plant-based",      emoji: "🌿" },
 ];
 
+export const DIET_PATTERNS = [
+  { id: "balanced",     label: "Balanced",      sub: "Well-rounded meals",       emoji: "🍽️" },
+  { id: "keto",         label: "Keto",          sub: "High-fat, very low carb",  emoji: "🥑" },
+  { id: "high_protein", label: "High protein",  sub: "Protein-focused",          emoji: "💪" },
+  { id: "low_carb",     label: "Low carb",      sub: "Reduced carbs",            emoji: "🥬" },
+  { id: "intermittent", label: "Intermittent",  sub: "16:8 eating window",       emoji: "⏱️" },
+  { id: "liquid",       label: "Liquid diet",   sub: "Smoothies, soups, juices", emoji: "🥤" },
+];
+
 export const EGG_PREFERENCES = [
   { id: "with_egg", label: "With egg", sub: "Eggs allowed", emoji: "🥚" },
   { id: "eggless",  label: "Eggless",  sub: "No eggs",      emoji: "🚫" },

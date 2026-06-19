@@ -1,4 +1,4 @@
-import { AGE_GROUPS, GENDERS, FEMALE_CONDITIONS, HEALTH_CONDITIONS, DIET_TYPES, EGG_PREFERENCES } from "../../constants/data";
+import { AGE_GROUPS, GENDERS, FEMALE_CONDITIONS, HEALTH_CONDITIONS, DIET_TYPES, EGG_PREFERENCES, DIET_PATTERNS } from "../../constants/data";
 import CardOption from "../common/CardOption";
 import Pill from "../common/Pill";
 import SLabel from "../common/SLabel";
@@ -81,6 +81,13 @@ export default function Step1({ data, set, onNext }) {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="card">
+        <SLabel note="How you want your meals structured — optional">Eating pattern</SLabel>
+        <div className="option-grid option-grid--three">
+          {DIET_PATTERNS.map(p => <CardOption key={p.id} active={data.dietPattern===p.id} onClick={()=>set("dietPattern", data.dietPattern===p.id ? "" : p.id)} emoji={p.emoji} label={p.label} sub={p.sub} />)}
+        </div>
       </div>
 
       <div className="card">

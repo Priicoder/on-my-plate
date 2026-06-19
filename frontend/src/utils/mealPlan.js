@@ -81,6 +81,15 @@ export const buildPrompt = (form) => {
 
   const observanceRule = (weekRule + dayRules).trim();
 
+  const PATTERN_RULE = {
+    keto: "Follow a KETO pattern: very low carb (~20–30g/day), high healthy fats (avocado, nuts, seeds, coconut, olive oil), moderate protein; avoid grains, rice, sugar, starchy vegetables and most fruit.",
+    high_protein: "High-protein pattern: prioritise protein in every meal (legumes, tofu, tempeh, soya, paneer, dairy, nuts, seeds).",
+    low_carb: "Low-carb pattern: minimise grains, rice, sugar and starchy foods; emphasise vegetables, protein and healthy fats.",
+    intermittent: 'Intermittent fasting (16:8): meals only within an 8-hour window — set "breakfast" = "Fasting (water / black coffee / green tea)" and place real meals in lunch, snack and an earlier dinner. Note the eating window in tips.',
+    liquid: "Liquid diet: ALL meals must be liquids only — smoothies, fresh juices, blended shakes, dal/vegetable soups, buttermilk; no solid foods.",
+  };
+  const patternRule = PATTERN_RULE[form.dietPattern] || "";
+
   let kitchenRule = "";
   if (form.kitchen === "minimal") {
     kitchenRule = "Kitchen: only a kettle/microwave — NO stovetop. Use no-cook or boil-water/microwave-only methods: overnight/soaked oats, instant items, microwaveable dishes, salads, sandwiches; nothing needing a stove, pan, or oven.";
@@ -90,7 +99,7 @@ export const buildPrompt = (form) => {
 
   return `You are a plant-based dietitian. Create a 7-day ${form.dietType} meal plan.
 Profile: ${ag} ${form.gender}${conds ? `, ${conds}` : ""}. Goals: ${goals}. Cuisine: ${cuisine}. Budget: ${budget}. Avoid: ${allrg}. Season: ${season}.${health ? `\nMedical considerations (tailor meals accordingly): ${health}.` : ""}
-Rules: ${form.dietType === "vegan" ? "Strictly vegan (no dairy/eggs/honey)." : form.eggPreference === "eggless" ? "Vegetarian, eggless (dairy ok, NO eggs)." : "Vegetarian (dairy+eggs ok)."}${religiousRules ? " " + religiousRules : ""}${kitchenRule ? " " + kitchenRule : ""}${observanceRule ? " " + observanceRule : ""} Keep each meal description under 15 words. Tip under 12 words. No repeated dishes.
+Rules: ${form.dietType === "vegan" ? "Strictly vegan (no dairy/eggs/honey)." : form.eggPreference === "eggless" ? "Vegetarian, eggless (dairy ok, NO eggs)." : "Vegetarian (dairy+eggs ok)."}${patternRule ? " " + patternRule : ""}${religiousRules ? " " + religiousRules : ""}${kitchenRule ? " " + kitchenRule : ""}${observanceRule ? " " + observanceRule : ""} Keep each meal description under 15 words. Tip under 12 words. No repeated dishes.
 Return ONLY raw JSON, no markdown, no extra text:
 {"Monday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Tuesday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Wednesday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Thursday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Friday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Saturday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Sunday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""}}`;
 };
