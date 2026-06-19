@@ -1,9 +1,9 @@
-import { card } from "../../constants/theme";
-import { AGE_GROUPS, GENDERS, FEMALE_CONDITIONS, DIET_TYPES } from "../../constants/data";
+import { AGE_GROUPS, GENDERS, FEMALE_CONDITIONS, HEALTH_CONDITIONS, DIET_TYPES, EGG_PREFERENCES, DIET_PATTERNS } from "../../constants/data";
 import CardOption from "../common/CardOption";
 import Pill from "../common/Pill";
 import SLabel from "../common/SLabel";
 import NavButtons from "../common/NavButtons";
+import "../../styles/steps.css";
 
 // ── STEP 1: Who are you? ──────────────────────────────────────────────────────
 export default function Step1({ data, set, onNext }) {
@@ -14,32 +14,48 @@ export default function Step1({ data, set, onNext }) {
   };
 
   const showConditions = data.gender === "female";
+  const showEggPref = data.dietType === "vegetarian";
   const canContinue = data.gender && data.ageGroup && data.dietType &&
-    (!showConditions || (data.conditions||[]).length > 0);
+    (!showConditions || (data.conditions||[]).length > 0) &&
+    (!showEggPref || data.eggPreference);
+
+  const selectDiet = (id) => {
+    set("dietType", id);
+    // Egg choice only applies to vegetarian — clear it otherwise
+    if (id !== "vegetarian") set("eggPreference", "");
+  };
+
+  // "None" is mutually exclusive with the other health conditions
+  const toggleHealth = (id) => {
+    const cur = data.healthConditions || [];
+    if (id === "none") { set("healthConditions", cur.includes("none") ? [] : ["none"]); return; }
+    const next = cur.filter(x => x !== "none");
+    set("healthConditions", next.includes(id) ? next.filter(x=>x!==id) : [...next, id]);
+  };
 
   return (
     <div>
-      <h2 style={{ fontSize:22, fontWeight:500, color:"#1C1C1C", marginBottom:4 }}>Tell us about you</h2>
-      <p style={{ fontSize:14, color:"#7A7670", marginBottom:24 }}>We use this to calibrate your nutritional needs.</p>
+      <h2 className="section-title">Tell us about you</h2>
+      <p className="section-sub">We use this to calibrate your nutritional needs.</p>
 
-      <div style={card}>
+      <div className="card">
         <SLabel note="This helps us understand your life stage">Age group</SLabel>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8 }}>
+        <div className="option-grid option-grid--age">
           {AGE_GROUPS.map(a => <CardOption key={a.id} active={data.ageGroup===a.id} onClick={()=>set("ageGroup",a.id)} emoji={a.emoji} label={a.label} sub={a.sub} />)}
         </div>
       </div>
 
-      <div style={card}>
+      <div className="card">
         <SLabel note="Affects calorie & micronutrient recommendations">Biological sex</SLabel>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+        <div className="pill-row">
           {GENDERS.map(g => <Pill key={g.id} active={data.gender===g.id} onClick={()=>set("gender",g.id)}>{g.emoji} {g.label}</Pill>)}
         </div>
       </div>
 
       {showConditions && (
-        <div style={{ ...card, borderColor: "#E8B4A0", background: "#FBF3EF" }}>
+        <div className="card card--alert">
           <SLabel note="Select all that apply — we'll customise nutrition for your needs">Any of these apply to you?</SLabel>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))", gap:8 }}>
+          <div className="option-grid option-grid--auto">
             {FEMALE_CONDITIONS.map(c => (
               <CardOption key={c.id}
                 active={(data.conditions||[]).includes(c.id)}
@@ -51,10 +67,38 @@ export default function Step1({ data, set, onNext }) {
         </div>
       )}
 
-      <div style={card}>
+      <div className="card">
         <SLabel note="We'll never suggest animal products either way">Diet type</SLabel>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-          {DIET_TYPES.map(d => <CardOption key={d.id} active={data.dietType===d.id} onClick={()=>set("dietType",d.id)} emoji={d.emoji} label={d.label} sub={d.sub} />)}
+        <div className="option-grid option-grid--two">
+          {DIET_TYPES.map(d => <CardOption key={d.id} active={data.dietType===d.id} onClick={()=>selectDiet(d.id)} emoji={d.emoji} label={d.label} sub={d.sub} />)}
+        </div>
+
+        {showEggPref && (
+          <div className="egg-pref">
+            <SLabel note="Should your plan include eggs?">Egg preference</SLabel>
+            <div className="option-grid option-grid--two">
+              {EGG_PREFERENCES.map(e => <CardOption key={e.id} active={data.eggPreference===e.id} onClick={()=>set("eggPreference",e.id)} emoji={e.emoji} label={e.label} sub={e.sub} />)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <SLabel note="How you want your meals structured — optional">Eating pattern</SLabel>
+        <div className="option-grid option-grid--three">
+          {DIET_PATTERNS.map(p => <CardOption key={p.id} active={data.dietPattern===p.id} onClick={()=>set("dietPattern", data.dietPattern===p.id ? "" : p.id)} emoji={p.emoji} label={p.label} sub={p.sub} />)}
+        </div>
+      </div>
+
+      <div className="card">
+        <SLabel note="We'll tailor nutrients to your needs — e.g. selenium for thyroid, low-GI for diabetes">Any health conditions?</SLabel>
+        <div className="option-grid option-grid--auto">
+          {HEALTH_CONDITIONS.map(c => (
+            <CardOption key={c.id}
+              active={(data.healthConditions||[]).includes(c.id)}
+              onClick={()=>toggleHealth(c.id)}
+              emoji={c.emoji} label={c.label} />
+          ))}
         </div>
       </div>
 

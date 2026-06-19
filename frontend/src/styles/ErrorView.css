@@ -1,0 +1,32 @@
+.error {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error__icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.error__title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.error__msg {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.error__btn {
+  padding: 12px 28px;
+  border-radius: 10px;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}

@@ -71,6 +71,41 @@ export const generatePrintHTML = (plan, data, days) => {
   </body></html>`;
 };
 
+export const generateGroceryPrintHTML = (groceries) => {
+  const esc = (s) => String(s).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const cats = Object.entries(groceries || {}).filter(([, items]) => Array.isArray(items) && items.length > 0);
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>On My Plate — Weekly Grocery List</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;padding:36px;color:#1C1C1C;max-width:760px;margin:0 auto;font-size:13px}
+    .brand{font-size:22px;font-weight:700;color:#4A7C59;margin-bottom:3px}
+    .tagline{font-size:11px;color:#7A7670;margin-bottom:20px}
+    .title{font-size:18px;font-weight:700;margin-bottom:20px;color:#1C1C1C}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .cat{border:1px solid #d0e8d8;border-radius:10px;padding:14px;break-inside:avoid}
+    .cat-title{font-size:13px;font-weight:700;color:#4A7C59;border-bottom:1px solid #d0e8d8;padding-bottom:7px;margin-bottom:10px}
+    .item{font-size:12px;color:#1C1C1C;line-height:1.7;padding-left:14px;position:relative}
+    .item::before{content:"☐";position:absolute;left:0;color:#4A7C59}
+    .footer{margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#aaa;line-height:1.6}
+    @media print{body{padding:20px}.cat{break-inside:avoid;page-break-inside:avoid}}
+  </style></head><body>
+  <div class="brand">🌿 On My Plate</div>
+  <div class="tagline">personalised plant-based nutrition</div>
+  <div class="title">🛒 Weekly grocery list</div>
+  <div class="grid">
+  ${cats.map(([cat, items]) => `<div class="cat">
+      <div class="cat-title">${esc(cat)}</div>
+      ${items.map(it => `<div class="item">${esc(it)}</div>`).join("")}
+    </div>`).join("")}
+  </div>
+  <div class="footer">
+    Generated ${new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}<br>
+    On My Plate · Approximate weekly quantities for one person.
+  </div>
+  </body></html>`;
+};
+
 export const triggerPrint = (html) => {
   let iframe = document.getElementById("omp-print-frame");
   if (!iframe) {

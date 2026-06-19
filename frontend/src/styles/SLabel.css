@@ -1,0 +1,16 @@
+.s-label {
+  margin-bottom: 10px;
+}
+
+.s-label__text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.s-label__text--with-note { margin-bottom: 3px; }
+
+.s-label__note {
+  font-size: 13px;
+  color: var(--muted);
+}

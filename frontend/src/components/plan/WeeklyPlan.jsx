@@ -1,12 +1,26 @@
 import { useState } from "react";
-import { card, SAGE, SAGE_L, SAGE_M, CLAY, CLAY_L, INK, MUTED, MIST, BORDER } from "../../constants/theme";
 import { CUISINES, AGE_GROUPS, GOALS, BUDGETS, DAYS, SEASON_FRUITS } from "../../constants/data";
 import { getSeason } from "../../utils/season";
-import { generatePrintHTML, triggerPrint } from "../../utils/printPlan";
+import { generatePrintHTML, generateGroceryPrintHTML, triggerPrint } from "../../utils/printPlan";
+import { buildGroceryPrompt, repairJSON } from "../../utils/mealPlan";
+import "../../styles/WeeklyPlan.css";
+
+const MEALS = [
+  { key: "breakfast", label: "Breakfast", emoji: "🌅" },
+  { key: "lunch",     label: "Lunch",     emoji: "☀️" },
+  { key: "snack",     label: "Snacks",    emoji: "🍎" },
+  { key: "dinner",    label: "Dinner",    emoji: "🌙" },
+];
 
 // ── RESULT: Weekly plan ────────────────────────────────────────────────────────
 export default function WeeklyPlan({ plan, data, onReset }) {
   const [activeDay, setActiveDay] = useState(0);
+
+  // Groceries: lazy-generated from the plan on demand, then cached
+  const [groceries, setGroceries] = useState(null);
+  const [gLoading, setGLoading] = useState(false);
+  const [gError, setGError] = useState(false);
+  const [gOpen, setGOpen] = useState(false);
 
   const season = getSeason();
   const fruits = SEASON_FRUITS[season];
@@ -19,43 +33,67 @@ export default function WeeklyPlan({ plan, data, onReset }) {
     triggerPrint(html);
   };
 
+  const handleGroceryPrint = () => {
+    if (groceries) triggerPrint(generateGroceryPrintHTML(groceries));
+  };
+
+  const loadGroceries = async () => {
+    setGLoading(true); setGError(false);
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const res = await fetch(`${API_BASE}/api/plan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: buildGroceryPrompt(plan) }),
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const body = await res.json();
+      setGroceries(repairJSON((body.text || "").trim()));
+    } catch (e) {
+      setGError(true);
+    } finally {
+      setGLoading(false);
+    }
+  };
+
+  const toggleGroceries = () => {
+    if (groceries) { setGOpen(o => !o); return; }
+    setGOpen(true);
+    loadGroceries();
+  };
+
   return (
     <div>
       {/* Header */}
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6, flexWrap:"wrap", gap:10 }}>
+      <div className="plan-header">
         <div>
-          <h2 style={{ fontSize:22, fontWeight:500, color:INK, marginBottom:4 }}>Your weekly meal plan</h2>
-          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <h2 className="plan-title">Your weekly meal plan</h2>
+          <div className="plan-tags">
             {[
               data.dietType==="vegan"?"🌿 Vegan":"🥛 Vegetarian",
               CUISINES.find(c=>c.id===data.cuisine)?.label,
               BUDGETS.find(b=>b.id===data.budget)?.label,
               ...(data.goals||[]).map(g=>GOALS.find(x=>x.id===g)?.emoji+" "+GOALS.find(x=>x.id===g)?.label),
             ].filter(Boolean).map((tag,i)=>(
-              <span key={i} style={{ fontSize:12, padding:"3px 10px", borderRadius:20, background:SAGE_L, color:SAGE, border:`0.5px solid ${SAGE_M}` }}>{tag}</span>
+              <span key={i} className="plan-tag">{tag}</span>
             ))}
           </div>
         </div>
-        <div style={{ display:"flex", gap:8 }}>
-          <button onClick={handlePrint} style={{ padding:"10px 18px", borderRadius:10, cursor:"pointer", background:SAGE, color:"#fff", border:"none", fontSize:13, fontWeight:500, display:"flex", alignItems:"center", gap:6, boxShadow:`0 4px 12px ${SAGE}44` }}>
-            🖨️ Save / Print
+        <div className="plan-actions">
+          <button onClick={handlePrint} className="btn-print">
+            🖨️ Save
           </button>
-          <button onClick={onReset} style={{ padding:"10px 16px", borderRadius:10, cursor:"pointer", background:"transparent", border:`1.5px solid ${BORDER}`, fontSize:13, color:MUTED }}>
+          <button onClick={onReset} className="btn-reset">
             Start over
           </button>
         </div>
       </div>
 
       {/* Day tabs */}
-      <div style={{ display:"flex", gap:4, marginTop:20, marginBottom:20, overflowX:"auto", paddingBottom:4 }}>
+      <div className="day-tabs">
         {DAYS.map((d,i)=>(
-          <button key={d} onClick={()=>setActiveDay(i)} style={{
-            padding:"8px 14px", borderRadius:8, border:"none", cursor:"pointer", whiteSpace:"nowrap",
-            background: activeDay===i ? SAGE : MIST,
-            color: activeDay===i ? "#fff" : MUTED,
-            fontWeight: activeDay===i ? 500 : 400,
-            fontSize:13, transition:"all 0.15s",
-          }}>{d.slice(0,3)}</button>
+          <button key={d} onClick={()=>setActiveDay(i)}
+            className={`day-tab${activeDay===i ? " day-tab--active" : ""}`}>{d.slice(0,3)}</button>
         ))}
       </div>
 
@@ -63,22 +101,17 @@ export default function WeeklyPlan({ plan, data, onReset }) {
       {(() => {
         const d = days[activeDay];
         return (
-          <div style={{ display:"grid", gap:12 }}>
-            {[
-              { key:"breakfast", label:"Breakfast", emoji:"🌅", bg:"#FFF8ED", border:"#F5D9A8" },
-              { key:"lunch",     label:"Lunch",     emoji:"☀️", bg:"#EDF5FF", border:"#B8D4F5" },
-              { key:"snack",     label:"Snacks",    emoji:"🍎", bg:SAGE_L,   border:SAGE_M    },
-              { key:"dinner",    label:"Dinner",    emoji:"🌙", bg:"#F5EDFF", border:"#D4B8F5" },
-            ].map(m=>(
-              <div key={m.key} style={{ background:m.bg, border:`1px solid ${m.border}`, borderRadius:14, padding:"16px 18px" }}>
-                <div style={{ fontSize:13, fontWeight:500, color:MUTED, marginBottom:6 }}>{m.emoji} {m.label}</div>
-                <div style={{ fontSize:14, color:INK, lineHeight:1.6 }}>{d[m.key] || "—"}</div>
+          <div className="meals">
+            {MEALS.map(m=>(
+              <div key={m.key} className={`meal meal--${m.key}`}>
+                <div className="meal__label">{m.emoji} {m.label}</div>
+                <div className="meal__text">{d[m.key] || "—"}</div>
               </div>
             ))}
             {d.tip && (
-              <div style={{ background:CLAY_L, border:`1px solid #ECC4AB`, borderRadius:14, padding:"14px 18px", display:"flex", gap:10, alignItems:"flex-start" }}>
-                <span style={{ fontSize:18 }}>💡</span>
-                <div style={{ fontSize:13, color:CLAY, lineHeight:1.6 }}>{d.tip}</div>
+              <div className="tip">
+                <span className="tip__icon">💡</span>
+                <div className="tip__text">{d.tip}</div>
               </div>
             )}
           </div>
@@ -86,29 +119,55 @@ export default function WeeklyPlan({ plan, data, onReset }) {
       })()}
 
       {/* Seasonal fruits */}
-      <div style={{ ...card, marginTop:16, background:SAGE_L, border:`1px solid ${SAGE_M}` }}>
-        <div style={{ fontSize:14, fontWeight:500, color:SAGE, marginBottom:8 }}>
+      <div className="card season">
+        <div className="season__title">
           🍋 Seasonal fruits — {season.charAt(0).toUpperCase()+season.slice(1)} {new Date().getFullYear()}
         </div>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:8 }}>
+        <div className="season__fruits">
           {fruits.map(f=>(
-            <span key={f} style={{ fontSize:13, padding:"5px 12px", borderRadius:20, background:"#fff", border:`1px solid ${SAGE_M}`, color:SAGE }}>{f}</span>
+            <span key={f} className="season__fruit">{f}</span>
           ))}
         </div>
-        <p style={{ fontSize:12, color:MUTED }}>Aim for 2–3 servings daily, between meals — not right before or after eating.</p>
+        <p className="season__note">Aim for 2–3 servings daily, between meals — not right before or after eating.</p>
       </div>
 
-      {/* Nav between days */}
-      <div style={{ display:"flex", justifyContent:"space-between", marginTop:16 }}>
-        <button onClick={()=>setActiveDay(d=>Math.max(0,d-1))} disabled={activeDay===0}
-          style={{ padding:"10px 20px", borderRadius:10, border:`1.5px solid ${BORDER}`, background:"transparent", cursor: activeDay===0?"not-allowed":"pointer", color: activeDay===0?MIST:MUTED, fontSize:13 }}>
-          ← {activeDay>0 ? DAYS[activeDay-1] : ""}
-        </button>
-        <button onClick={()=>setActiveDay(d=>Math.min(6,d+1))} disabled={activeDay===6}
-          style={{ padding:"10px 20px", borderRadius:10, border:"none", background: activeDay===6?MIST:SAGE, cursor: activeDay===6?"not-allowed":"pointer", color: activeDay===6?MUTED:"#fff", fontSize:13, fontWeight:500 }}>
-          {activeDay<6 ? DAYS[activeDay+1] : ""} →
+      {/* Required groceries */}
+      <div className="grocery-actions">
+        <button onClick={toggleGroceries} className="btn-print">
+          🛒 {gOpen && groceries ? "Hide groceries" : "Required groceries"}
         </button>
       </div>
+
+      {gOpen && (
+        <div className="card grocery">
+          <div className="grocery__head">
+            <div className="grocery__title">🛒 Weekly grocery list</div>
+            {groceries && !gLoading && (
+              <button onClick={handleGroceryPrint} className="btn-print">🖨️ Save</button>
+            )}
+          </div>
+          {gLoading && <p className="grocery__msg">Gathering your ingredients…</p>}
+          {gError && (
+            <p className="grocery__msg">
+              Couldn't generate the list. <button className="grocery__retry" onClick={loadGroceries}>Try again</button>
+            </p>
+          )}
+          {groceries && !gLoading && (
+            <div className="grocery__grid">
+              {Object.entries(groceries)
+                .filter(([, items]) => Array.isArray(items) && items.length > 0)
+                .map(([cat, items]) => (
+                  <div key={cat} className="grocery__cat">
+                    <div className="grocery__cat-title">{cat}</div>
+                    <ul className="grocery__list">
+                      {items.map((it, i) => <li key={i}>{it}</li>)}
+                    </ul>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

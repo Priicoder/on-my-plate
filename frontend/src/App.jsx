@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { CREAM, SAGE, BORDER, MUTED } from "./constants/theme";
+import { useState, useEffect } from "react";
 import { DAYS } from "./constants/data";
 import { buildPrompt, repairJSON } from "./utils/mealPlan";
 import Progress from "./components/common/Progress";
@@ -9,7 +8,7 @@ import Step1 from "./components/steps/Step1";
 import Step2 from "./components/steps/Step2";
 import WeeklyPlan from "./components/plan/WeeklyPlan";
 
-const EMPTY_FORM = { ageGroup:"", gender:"", conditions:[], dietType:"", goals:[], cuisine:"", budget:"", allergies:[] };
+const EMPTY_FORM = { ageGroup:"", gender:"", conditions:[], healthConditions:[], dietType:"", eggPreference:"", dietPattern:"", goals:[], cuisine:"", budget:"", kitchen:"", allergies:[], religiousPrefs:[], faith:"", observanceEvents:[] };
 
 // ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
@@ -18,26 +17,26 @@ export default function App() {
   const [plan, setPlan]     = useState(null);
   const [errMsg, setErrMsg] = useState("");
 
+  // Each step should open at the top so the user never lands mid-page
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "auto" }); }, [step]);
+
   const set = (key, val) => setForm(f=>({...f,[key]:val}));
 
   const generate = async () => {
     setStep(3);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const res = await fetch(`${API_BASE}/api/plan`, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({
-          model:"claude-sonnet-4-6",
-          max_tokens:4000,
-          messages:[{ role:"user", content: buildPrompt(form) }],
-        }),
+        body: JSON.stringify({ prompt: buildPrompt(form) }),
       });
       if (!res.ok) {
         const errBody = await res.text().catch(()=>"");
         throw new Error(`API error ${res.status}${errBody? ": "+errBody.slice(0,120):""}`);
       }
       const data = await res.json();
-      const raw = data.content.map(b=>b.text||"").join("").trim();
+      const raw = (data.text || "").trim();
       const parsed = repairJSON(raw);
       // Ensure all 7 days exist with fallback
       const keys = Object.keys(parsed);
@@ -54,23 +53,23 @@ export default function App() {
   };
 
   return (
-    <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+    <div className="app">
       {/* Top bar */}
-      <div style={{ borderBottom:`1px solid ${BORDER}`, background:"#fff", padding:"0 20px" }}>
-        <div style={{ maxWidth:680, margin:"0 auto", padding:"14px 0", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <span style={{ fontSize:22 }}>🌿</span>
+      <div className="topbar">
+        <div className="topbar__inner">
+          <div className="brand">
+            <span className="brand__logo">🌿</span>
             <div>
-              <div style={{ fontSize:16, fontWeight:600, color:SAGE, letterSpacing:"-0.3px" }}>On My Plate</div>
-              <div style={{ fontSize:11, color:MUTED, marginTop:-1 }}>personalised plant-based nutrition</div>
+              <div className="brand__name">On My Plate</div>
+              <div className="brand__tag">personalised plant-based nutrition</div>
             </div>
           </div>
-          {step < 3 && <span style={{ fontSize:12, color:MUTED }}>Free · No sign-up · Private</span>}
+          {step < 3 && <span className="topbar__note">Free · No sign-up · Private</span>}
         </div>
       </div>
 
       {/* Body */}
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"28px 20px 60px" }}>
+      <div className="container">
         {step < 3 && <Progress step={step} total={3} />}
 
         {step===0 && <Step1 data={form} set={set} onNext={()=>setStep(1)} />}
