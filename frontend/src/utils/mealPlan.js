@@ -40,30 +40,67 @@ export const buildPrompt = (form) => {
     return "";
   }).filter(Boolean).join(" ");
 
-  const days = (form.fastingDays || []).join(", ");
-  let observanceRule = "";
-  switch (form.observance) {
-    case "sattvic_days":
-      if (days) observanceRule = `On ONLY these days (${days}) serve light, simple sattvic meals — no onion or garlic, easy to digest, lighter portions. Note "light/sattvic" in the tip for those days.`;
-      break;
-    case "vrat_days":
-      if (days) observanceRule = `On ONLY these days (${days}) all meals must be vrat/falahari food (fruits, sabudana, samak/barnyard millet, sendha namak, dairy, nuts); avoid grains, wheat, rice, lentils, regular salt, onion and garlic. Note "vrat" in the tip for those days.`;
-      break;
-    case "navratri":
-      observanceRule = `This is a 9-day Navratri fast: EVERY meal on all 7 days must be falahari/vrat food — kuttu (buckwheat) flour, singhara (water chestnut) flour, samak rice, sabudana, potato, fruits, dairy, nuts, sendha namak; NO grains, wheat, rice, lentils, regular salt, onion or garlic.`;
-      break;
-    case "ramadan":
-      observanceRule = `This is Ramadan (Roza), fasting dawn to sunset. Restructure each day: "breakfast" = Sehri (pre-dawn, filling, slow-energy, hydrating), "lunch" = "Fasting (no food/water)", "snack" = Iftar opening (dates, water, fruit), "dinner" = Iftar main meal. Prioritise hydration and slow-release energy; note Sehri/Iftar in the tip.`;
-      break;
-    default:
-      observanceRule = "";
+  // Selected fasting/festival events from the calendar — single-day ones tag their
+  // weekday; Navratri/Ramadan span the whole plan.
+  const events = form.observanceEvents || [];
+  const DAY_RULE = {
+    // Hindu
+    ekadashi: "vrat/falahari food (fruits, sabudana, samak rice, sendha namak, dairy, nuts) — no grains, rice, wheat, lentils, regular salt, onion or garlic",
+    pradosh: "light sattvic fasting food eaten after sunset — no onion or garlic, light dinner",
+    sawan_somwar: "sattvic Monday vrat — light and falahari-friendly, no onion or garlic",
+    // Jain
+    jain_ashtami: "Jain fast — plain, simple food eaten before sunset; no root vegetables and no green/leafy vegetables (many observe upvas with only fruit and water)",
+    jain_chaudas: "Jain fast — plain, simple food eaten before sunset; no root vegetables and no green/leafy vegetables",
+    // Christian
+    ash_wednesday: "Christian fast — one modest, simple, meat-free meal and lighter eating through the day",
+    lent_friday: "Lenten Friday — simple, modest, meat-free meals",
+    good_friday: "Good Friday — simple, light, meat-free meals; abstinence and reflection",
+    // Buddhist
+    uposatha: "Buddhist Uposatha — light vegetarian meals; stricter observers take nothing after noon",
+    buddha_purnima: "Buddha Purnima (Vesak) — simple sattvic vegetarian meals",
+    // Sikh
+    gurpurab: "Gurpurab — festive langar-style simple vegetarian meal (dal, sabzi, roti, kheer)",
+    baisakhi: "Baisakhi — festive vegetarian harvest meal",
+  };
+
+  const byDay = {};
+  events.filter(e => DAY_RULE[e.type]).forEach(e => {
+    (byDay[e.weekday] = byDay[e.weekday] || []).push(`${e.name} (${DAY_RULE[e.type]})`);
+  });
+  const dayRules = Object.entries(byDay)
+    .map(([wd, list]) => `On ${wd}: ${[...new Set(list)].join("; ")} — note it in that day's tip.`)
+    .join(" ");
+
+  let weekRule = "";
+  if (events.some(e => e.type === "navratri")) {
+    weekRule += `Navratri fast is on: EVERY meal on all 7 days must be falahari — kuttu (buckwheat), singhara (water chestnut), samak rice, sabudana, potato, fruits, dairy, nuts, sendha namak; NO grains, wheat, rice, lentils, regular salt, onion or garlic. `;
+  }
+  if (events.some(e => e.type === "ramadan")) {
+    weekRule += `Ramadan (Roza) is on: each day "breakfast" = Sehri (pre-dawn, filling, hydrating), "lunch" = "Fasting (no food/water)", "snack" = Iftar opening (dates, water, fruit), "dinner" = Iftar main meal. Prioritise hydration and slow-release energy; note Sehri/Iftar in the tip. `;
+  }
+
+  const observanceRule = (weekRule + dayRules).trim();
+
+  let kitchenRule = "";
+  if (form.kitchen === "minimal") {
+    kitchenRule = "Kitchen: only a kettle/microwave — NO stovetop. Use no-cook or boil-water/microwave-only methods: overnight/soaked oats, instant items, microwaveable dishes, salads, sandwiches; nothing needing a stove, pan, or oven.";
+  } else if (form.kitchen === "nocook") {
+    kitchenRule = "Kitchen: NONE (PG/hostel) — suggest only ready-to-eat, NO-COOK meals needing zero heat: fruits, salads, sprouts, curd/yogurt, milk, overnight oats, dry fruits, nuts, peanut butter, whole-grain bread/sandwiches, hummus, paneer cubes, and healthy ready-to-eat packaged options. No recipe may require a stove, microwave, oven, or even hot water.";
   }
 
   return `You are a plant-based dietitian. Create a 7-day ${form.dietType} meal plan.
 Profile: ${ag} ${form.gender}${conds ? `, ${conds}` : ""}. Goals: ${goals}. Cuisine: ${cuisine}. Budget: ${budget}. Avoid: ${allrg}. Season: ${season}.${health ? `\nMedical considerations (tailor meals accordingly): ${health}.` : ""}
-Rules: ${form.dietType === "vegan" ? "Strictly vegan (no dairy/eggs/honey)." : form.eggPreference === "eggless" ? "Vegetarian, eggless (dairy ok, NO eggs)." : "Vegetarian (dairy+eggs ok)."}${religiousRules ? " " + religiousRules : ""}${observanceRule ? " " + observanceRule : ""} Keep each meal description under 15 words. Tip under 12 words. No repeated dishes.
+Rules: ${form.dietType === "vegan" ? "Strictly vegan (no dairy/eggs/honey)." : form.eggPreference === "eggless" ? "Vegetarian, eggless (dairy ok, NO eggs)." : "Vegetarian (dairy+eggs ok)."}${religiousRules ? " " + religiousRules : ""}${kitchenRule ? " " + kitchenRule : ""}${observanceRule ? " " + observanceRule : ""} Keep each meal description under 15 words. Tip under 12 words. No repeated dishes.
 Return ONLY raw JSON, no markdown, no extra text:
 {"Monday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Tuesday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Wednesday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Thursday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Friday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Saturday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""},"Sunday":{"breakfast":"","lunch":"","snack":"","dinner":"","tip":""}}`;
+};
+
+// Asks the model to roll the 7-day plan up into one categorised weekly shopping list
+export const buildGroceryPrompt = (plan) => {
+  return `From this 7-day meal plan, create ONE consolidated weekly grocery shopping list for a single person. Combine duplicate ingredients across all days into a single line with an approximate total quantity (metric). Group items by category.
+Plan JSON: ${JSON.stringify(plan)}
+Return ONLY raw JSON, no markdown, no extra text, in exactly this shape (use an empty array for any category with no items):
+{"Vegetables":["item — qty"],"Fruits":["item — qty"],"Grains & flours":["item — qty"],"Pulses & legumes":["item — qty"],"Dairy & alternatives":["item — qty"],"Nuts & seeds":["item — qty"],"Pantry & spices":["item — qty"]}`;
 };
 
 export const repairJSON = (raw) => {
