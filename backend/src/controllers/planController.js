@@ -24,7 +24,7 @@ export async function generatePlan(req, res, next) {
         'content-type': 'application/json',
         authorization: `Bearer ${env.openRouterApiKey}`,
         // Optional OpenRouter attribution headers
-        'HTTP-Referer': 'http://localhost:5173',
+        'HTTP-Referer': 'https://on-my-plate.vercel.app/ || http://localhost:5173/',
         'X-Title': 'On My Plate',
       },
       body: JSON.stringify({

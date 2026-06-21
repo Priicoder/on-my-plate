@@ -9,7 +9,7 @@ export function createApp() {
   app.use(cors({
     origin: [
       "http://localhost:5173",
-      "https://your-vercel-app.vercel.app"
+      "https://on-my-plate.vercel.app/"
     ]
   }));
   app.use(express.json());
