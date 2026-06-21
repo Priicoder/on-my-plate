@@ -16,7 +16,7 @@ export default function Step2({ data, set, onNext, onBack }) {
 
   // Pull the upcoming fasting/festival calendar (Hindu Panchang computed + Ramadan via API)
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+    const API_BASE = import.meta.env.VITE_API_BASE_URL; // || "http://localhost:5000"
     fetch(`${API_BASE}/api/observances`)
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
       .then(d => { setObservances(d.events || []); setObsState("ready"); })
