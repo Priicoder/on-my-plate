@@ -4,6 +4,20 @@
 }
 
 .option-grid--age { grid-template-columns: repeat(5, 1fr); }
+
+@media (max-width: 480px) {
+  .option-grid--age {
+    grid-template-columns: repeat(5, minmax(96px, 1fr));
+    grid-auto-flow: column;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .option-grid--age .card-option {
+    scroll-snap-align: start;
+  }
+}
 .option-grid--auto { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 .option-grid--auto-sm { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
 
